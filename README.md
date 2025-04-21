@@ -24,35 +24,83 @@ booking-system/
 ├── api/                    # Booking API service
 │   ├── src/               # Source code
 │   ├── tests/             # Unit tests
-│   └── requirements.txt   # Dependencies
+│   └── setup.py          # Package configuration
 ├── consumer/              # Notification service
 │   ├── src/              # Source code
 │   ├── tests/            # Unit tests
-│   └── requirements.txt  # Dependencies
+│   └── setup.py         # Package configuration
 └── infrastructure/        # Infrastructure as Code
     └── template.yaml     # AWS SAM template
 ```
 
+## Environment Setup
+
+### Prerequisites
+
+- Python 3.9+
+- PostgreSQL
+- AWS Account (for SQS)
+- Git
+
+### Database Setup
+
+1. Create a PostgreSQL database:
+```bash
+createdb therapist_booking
+```
+
+2. Apply the database schema:
+```bash
+psql -U postgres -d therapist_booking -f api/src/infrastructure/schema.sql
+```
+
+### Environment Variables
+
+1. Create `.env` files in both `api/` and `consumer/` directories with the following content:
+
+For `api/.env`:
+```
+# Database configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/therapist_booking
+
+# AWS configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=us-east-1
+SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/your_account_id/booking-queue
+```
+
+For `consumer/.env`:
+```
+# AWS configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=us-east-1
+SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/your_account_id/booking-queue
+```
+
+Replace the placeholder values with your actual credentials.
+
 ## Setup Instructions
 
-1. Create a virtual environment:
+1. Clone the repository:
+```bash
+git clone <https://github.com/HugoMzFernandes/booking-system.git>
+cd booking-system
+```
+
+2. Create a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 ```bash
 cd api
-pip install -r requirements.txt
+pip install -e .
 cd ../consumer
-pip install -r requirements.txt
-```
-
-3. Set up PostgreSQL:
-```bash
-# Create database and tables
-psql -U postgres -f api/src/infrastructure/schema.sql
+pip install -e .
 ```
 
 4. Run tests:
@@ -77,6 +125,13 @@ uvicorn src.main:app --reload
 - `POST /bookings` - Create a new booking
 - `GET /bookings/{booking_id}` - Get booking details
 - `GET /health` - Health check endpoint
+
+## Swagger Documentation
+
+Once the API is running, you can access the Swagger documentation at:
+```
+http://localhost:8000/docs
+```
 
 ## Possible Improvements
 
