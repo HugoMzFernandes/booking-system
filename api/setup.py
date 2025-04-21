@@ -9,7 +9,7 @@ setup(
         "uvicorn==0.24.0",
         "sqlalchemy==2.0.23",
         "psycopg2-binary==2.9.9",
-        "pydantic==2.5.2",
+        "pydantic[email]==2.5.2",
         "pytest==7.4.3",
         "pytest-asyncio==0.21.1",
         "httpx==0.25.2",

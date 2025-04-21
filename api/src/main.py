@@ -6,7 +6,7 @@ from datetime import datetime
 from .infrastructure.database import get_db
 from .infrastructure.repository import BookingRepository, TherapistRepository
 from .infrastructure.sqs import SQSClient
-from .core.models import Booking, BookingCreate
+from .core.models import Booking, BookingCreate, Therapist
 
 app = FastAPI(
     title="Therapist Booking API",
@@ -116,4 +116,64 @@ async def get_therapist_bookings(
         List of bookings
     """
     booking_repo = BookingRepository(db)
-    return booking_repo.get_by_therapist(therapist_id) 
+    return booking_repo.get_by_therapist(therapist_id)
+
+@app.post("/therapists", response_model=Therapist)
+async def create_therapist(
+    therapist: Therapist,
+    db: Session = Depends(get_db)
+):
+    """
+    Create a new therapist.
+    
+    Args:
+        therapist: Therapist details
+        db: Database session
+        
+    Returns:
+        Created therapist
+    """
+    therapist_repo = TherapistRepository(db)
+    return therapist_repo.create(therapist)
+
+@app.get("/therapists", response_model=List[Therapist])
+async def list_therapists(
+    db: Session = Depends(get_db)
+):
+    """
+    List all therapists.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        List of therapists
+    """
+    therapist_repo = TherapistRepository(db)
+    return therapist_repo.list_all()
+
+@app.get("/therapists/{therapist_id}", response_model=Therapist)
+async def get_therapist(
+    therapist_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Get therapist by ID.
+    
+    Args:
+        therapist_id: ID of the therapist to retrieve
+        db: Database session
+        
+    Returns:
+        Therapist details
+    """
+    therapist_repo = TherapistRepository(db)
+    therapist = therapist_repo.get_by_id(therapist_id)
+    
+    if not therapist:
+        raise HTTPException(
+            status_code=404,
+            detail="Therapist not found"
+        )
+    
+    return therapist 
